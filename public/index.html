@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Replate — Food-Waste Matchmaker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #F6F3EC;
+    --ink: #202B1F;
+    --green: #2F5233;
+    --green-dark: #1B2E1D;
+    --gold: #E8A33D;
+    --rust: #C1440E;
+    --card: #FFFDF8;
+    --line: #DCD5C4;
+    --muted: #6E7566;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:'Inter',sans-serif;line-height:1.5;}
+  h1,h2,h3,.serif{font-family:'Fraunces',serif;}
+  button{font-family:inherit;cursor:pointer;}
+  input,select,textarea{font-family:inherit;}
+  #app{min-height:100vh;display:flex;flex-direction:column;}
+
+  /* ---- top bar ---- */
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:18px 28px;border-bottom:1px solid var(--line);}
+  .brand{display:flex;align-items:center;gap:10px;}
+  .brand svg{width:28px;height:28px;}
+  .brand .name{font-family:'Fraunces',serif;font-weight:600;font-size:20px;letter-spacing:.2px;}
+  .who{display:flex;align-items:center;gap:14px;font-size:14px;color:var(--muted);}
+  .who b{color:var(--ink);}
+  .btn{border:none;border-radius:7px;padding:9px 16px;font-weight:600;font-size:14px;transition:transform .08s ease;}
+  .btn:active{transform:scale(.97);}
+  .btn-primary{background:var(--green);color:#fff;}
+  .btn-primary:hover{background:var(--green-dark);}
+  .btn-ghost{background:transparent;border:1px solid var(--line);color:var(--ink);}
+  .btn-ghost:hover{border-color:var(--ink);}
+  .btn-gold{background:var(--gold);color:#2A1B03;}
+  .btn-gold:hover{filter:brightness(0.95);}
+  .btn-small{padding:6px 12px;font-size:13px;border-radius:6px;}
+  .btn[disabled]{opacity:.45;cursor:default;}
+
+  main{flex:1;width:100%;}
+
+  /* ---- landing ---- */
+  .hero{max-width:760px;margin:64px auto 20px;padding:0 24px;text-align:left;}
+  .hero h1{font-size:clamp(32px,5vw,52px);font-weight:600;line-height:1.08;margin:0 0 18px;}
+  .hero p{font-size:17px;color:var(--muted);max-width:520px;margin:0 0 30px;}
+  .hero-actions{display:flex;gap:12px;}
+  .stat-row{display:flex;gap:36px;max-width:760px;margin:56px auto 80px;padding:28px 24px 0;border-top:1px solid var(--line);}
+  .stat b{display:block;font-family:'Fraunces',serif;font-size:30px;font-weight:600;}
+  .stat span{font-size:13px;color:var(--muted);}
+
+  /* ---- auth ---- */
+  .auth-wrap{max-width:420px;margin:60px auto;padding:0 24px;}
+  .auth-wrap h2{margin-bottom:4px;}
+  .auth-wrap .sub{color:var(--muted);font-size:14px;margin-bottom:26px;}
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;}
+  .field input,.field select,.field textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:7px;background:#fff;font-size:14px;color:var(--ink);}
+  .field textarea{resize:vertical;min-height:64px;}
+  .role-tiles{display:flex;gap:12px;margin-bottom:18px;}
+  .role-tile{flex:1;border:1.5px solid var(--line);border-radius:10px;padding:14px 12px;text-align:left;background:#fff;}
+  .role-tile.active{border-color:var(--green);background:#F1F5EE;}
+  .role-tile b{display:block;font-size:14px;}
+  .role-tile span{font-size:12px;color:var(--muted);}
+  .error{background:#FBEAE2;color:var(--rust);border:1px solid #ECC3AE;padding:9px 12px;border-radius:7px;font-size:13px;margin-bottom:14px;}
+  .switch-line{margin-top:18px;font-size:13px;color:var(--muted);}
+  .switch-line a{color:var(--green);font-weight:600;text-decoration:none;cursor:pointer;}
+
+  /* ---- dashboard ---- */
+  .dash{max-width:920px;margin:0 auto;padding:32px 24px 80px;}
+  .tabs{display:flex;gap:6px;margin-bottom:28px;border-bottom:1px solid var(--line);}
+  .tab{padding:10px 4px;margin-right:22px;font-size:14px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;background:none;border-top:none;border-left:none;border-right:none;}
+  .tab.active{color:var(--ink);border-bottom-color:var(--green);}
+  .section-title{font-size:22px;margin:0 0 4px;}
+  .section-sub{color:var(--muted);font-size:14px;margin:0 0 22px;}
+
+  .form-card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:22px;margin-bottom:34px;}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px 16px;}
+  .form-grid .full{grid-column:1/-1;}
+
+  .listing{display:grid;grid-template-columns:78px 1fr auto;gap:18px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:16px 18px;background:var(--card);margin-bottom:12px;}
+  .listing .clock{text-align:center;}
+  .listing .clock b{display:block;font-family:'Fraunces',serif;font-size:22px;line-height:1;}
+  .listing .clock span{font-size:11px;color:var(--muted);text-transform:lowercase;}
+  .clock.urgent b{color:var(--rust);}
+  .clock.soon b{color:var(--gold);}
+  .clock.plenty b{color:var(--green);}
+  .listing .title{font-weight:700;font-size:16px;margin:0 0 3px;}
+  .listing .meta{font-size:13px;color:var(--muted);margin:0 0 2px;}
+  .badge{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;margin-left:6px;letter-spacing:.2px;}
+  .badge.available{background:#EAF2E4;color:var(--green);}
+  .badge.claimed{background:#FDF1DD;color:#93630F;}
+  .badge.completed{background:#EDEBE5;color:var(--muted);}
+  .empty{border:1px dashed var(--line);border-radius:12px;padding:34px 20px;text-align:center;color:var(--muted);font-size:14px;}
+  .empty b{display:block;color:var(--ink);font-size:16px;margin-bottom:4px;font-family:'Fraunces',serif;}
+  .foot-note{max-width:920px;margin:0 auto 50px;padding:0 24px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:16px;}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+/* ---------------- API helpers ---------------- */
+// Same-origin by default (backend serves this file from /public).
+// Point this at http://localhost:3001 if you're serving the HTML separately.
+const API_BASE = '';
+
+async function api(path, opts = {}){
+  const res = await fetch(API_BASE + path, {
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    ...opts
+  });
+  let data = null;
+  try{ data = await res.json(); }catch(e){ /* no body */ }
+  if(!res.ok){
+    throw new Error((data && data.error) || 'Something went wrong.');
+  }
+  return data;
+}
+
+async function fetchListings(scope){
+  const data = await api('/api/listings?scope=' + encodeURIComponent(scope));
+  return data.listings;
+}
+async function fetchStats(){
+  return api('/api/listings/stats');
+}
+async function fetchMe(){
+  try{ const data = await api('/api/auth/me'); return data.user; }
+  catch(e){ return null; }
+}
+
+/* ---------------- app state ---------------- */
+let state = {
+  view: 'landing',       // landing | login | signup | dashboard
+  authRole: 'donor',     // role chosen on signup form
+  currentUser: null,     // {username,name,org,role}
+  tab: null,             // dashboard tab
+  error: '',
+  loading: true
+};
+
+function esc(s){ return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function uid(){ return 'id_' + Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
+
+function hoursLeft(iso){
+  const diff = (new Date(iso).getTime() - Date.now()) / 36e5;
+  return diff;
+}
+function fmtTimeLeft(iso){
+  const h = hoursLeft(iso);
+  if(h <= 0) return {num:'0', unit:'expired', cls:'urgent'};
+  if(h < 1) return {num: Math.round(h*60), unit:'min left', cls:'urgent'};
+  if(h < 6) return {num: Math.round(h), unit:'hrs left', cls:'urgent'};
+  if(h < 24) return {num: Math.round(h), unit:'hrs left', cls:'soon'};
+  return {num: Math.round(h/24), unit:'days left', cls:'plenty'};
+}
+
+const logoSvg = `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="20" cy="20" r="19" stroke="#2F5233" stroke-width="2"/>
+  <path d="M20 30C13 30 9 25 9 19c6 1 9-2 9-8 4 0 8 4 8 10 3-1 5-3 6-6 1 8-4 15-12 15Z" fill="#2F5233"/>
+</svg>`;
+
+/* ---------------- render ---------------- */
+const appEl = document.getElementById('app');
+
+function render(){
+  if(state.loading){ appEl.innerHTML = ''; return; }
+  if(!state.currentUser){
+    if(state.view === 'login') return renderAuth('login');
+    if(state.view === 'signup') return renderAuth('signup');
+    return renderLanding();
+  }
+  return renderDashboard();
+}
+
+function renderLanding(){
+  appEl.innerHTML = `
+    <div class="topbar">
+      <div class="brand">${logoSvg}<span class="name">Gleaned</span></div>
+      <div class="who">
+        <button class="btn btn-ghost btn-small" onclick="goto('login')">Log in</button>
+        <button class="btn btn-primary btn-small" onclick="goto('signup')">Sign up</button>
+      </div>
+    </div>
+    <main>
+      <div class="hero">
+        <h1>Surplus food finds a plate before it finds a bin.</h1>
+        <p>Restaurants, hostels and event kitchens post food that's about to go spare. Nearby NGOs and volunteers claim it and pick it up before it expires. No middlemen, no waste.</p>
+        <div class="hero-actions">
+          <button class="btn btn-gold" onclick="goto('signup')">List surplus food</button>
+          <button class="btn btn-ghost" onclick="goto('signup')">Find pickups near you</button>
+        </div>
+      </div>
+      <div class="stat-row" id="statRow"></div>
+    </main>
+    <div class="foot-note">Prototype — accounts and listings here are for demonstration and stored for this app only. Don't reuse a real password.</div>
+  `;
+  renderLandingStats();
+}
+
+async function renderLandingStats(){
+  const el = document.getElementById('statRow');
+  if(!el) return;
+  let stats;
+  try{ stats = await fetchStats(); }
+  catch(e){ stats = { available: 0, completed: 0, donorOrgs: 0 }; }
+  el.innerHTML = `
+    <div class="stat"><b>${stats.available}</b><span>open pickups right now</span></div>
+    <div class="stat"><b>${stats.completed}</b><span>pickups completed</span></div>
+    <div class="stat"><b>${stats.donorOrgs}</b><span>donor accounts registered</span></div>
+  `;
+}
+
+function renderAuth(mode){
+  const isLogin = mode === 'login';
+  appEl.innerHTML = `
+    <div class="topbar">
+      <div class="brand" style="cursor:pointer" onclick="goto('landing')">${logoSvg}<span class="name">Gleaned</span></div>
+      <div class="who"><button class="btn btn-ghost btn-small" onclick="goto('landing')">Back</button></div>
+    </div>
+    <main>
+      <div class="auth-wrap">
+        <h2>${isLogin ? 'Welcome back' : 'Create an account'}</h2>
+        <div class="sub">${isLogin ? 'Log in to post or claim surplus food.' : 'Tell us who you are so we can match you correctly.'}</div>
+        ${state.error ? `<div class="error">${esc(state.error)}</div>` : ''}
+        <form id="authForm" onsubmit="return false;">
+          ${!isLogin ? `
+          <div class="role-tiles">
+            <button type="button" class="role-tile ${state.authRole==='donor'?'active':''}" onclick="setAuthRole('donor')">
+              <b>I have surplus food</b><span>Restaurant, hostel, event, caterer</span>
+            </button>
+            <button type="button" class="role-tile ${state.authRole==='collector'?'active':''}" onclick="setAuthRole('collector')">
+              <b>I can collect food</b><span>NGO, shelter, volunteer</span>
+            </button>
+          </div>
+          <div class="field"><label>Your name</label><input id="f_name" placeholder="e.g. Aman Kaur" required></div>
+          <div class="field"><label>${state.authRole==='donor'?'Restaurant / hostel / organization name':'NGO / organization name'}</label><input id="f_org" placeholder="e.g. Green Leaf Kitchen" required></div>
+          ` : ''}
+          <div class="field"><label>Username</label><input id="f_user" placeholder="e.g. greenleaf01" required></div>
+          <div class="field"><label>Password</label><input id="f_pass" type="password" placeholder="At least 6 characters" required></div>
+          <button class="btn btn-primary" style="width:100%;padding:11px;" onclick="${isLogin ? 'submitLogin()' : 'submitSignup()'}">${isLogin ? 'Log in' : 'Create account'}</button>
+        </form>
+        <div class="switch-line">
+          ${isLogin ? `New here? <a onclick="goto('signup')">Create an account</a>` : `Already have an account? <a onclick="goto('login')">Log in</a>`}
+        </div>
+      </div>
+    </main>
+  `;
+}
+
+function renderDashboard(){
+  const u = state.currentUser;
+  if(!state.tab) state.tab = u.role === 'donor' ? 'mylistings' : 'available';
+  const donorTabs = [['post','Post food'],['mylistings','My listings']];
+  const collectorTabs = [['available','Available pickups'],['myclaims','My claims']];
+  const tabs = u.role === 'donor' ? donorTabs : collectorTabs;
+
+  appEl.innerHTML = `
+    <div class="topbar">
+      <div class="brand">${logoSvg}<span class="name">Gleaned</span></div>
+      <div class="who">
+        <span><b>${esc(u.name)}</b> · ${esc(u.org)} <span class="badge ${u.role==='donor'?'available':'claimed'}">${u.role==='donor'?'Donor':'Collector'}</span></span>
+        <button class="btn btn-ghost btn-small" onclick="logout()">Log out</button>
+      </div>
+    </div>
+    <main>
+      <div class="dash">
+        <div class="tabs">
+          ${tabs.map(([id,label]) => `<button class="tab ${state.tab===id?'active':''}" onclick="setTab('${id}')">${label}</button>`).join('')}
+        </div>
+        <div id="tabContent">Loading…</div>
+      </div>
+    </main>
+    <div class="foot-note">Prototype — accounts and listings here are for demonstration and stored for this app only. Don't reuse a real password.</div>
+  `;
+  renderTabContent();
+}
+
+async function renderTabContent(){
+  const el = document.getElementById('tabContent');
+  if(!el) return;
+  const u = state.currentUser;
+
+  if(state.tab === 'post'){
+    el.innerHTML = `
+      <h3 class="section-title">Post surplus food</h3>
+      <p class="section-sub">List what you have so nearby collectors can claim it before it expires.</p>
+      <div class="form-card">
+        <div class="form-grid">
+          <div class="field"><label>What kind of food</label><input id="p_food" placeholder="e.g. Vegetable biryani, packed meals"></div>
+          <div class="field"><label>Quantity</label><input id="p_qty" placeholder="e.g. 40 servings / 12 kg"></div>
+          <div class="field"><label>Ready for pickup by</label><input id="p_expiry" type="datetime-local"></div>
+          <div class="field"><label>Pickup window</label><input id="p_window" placeholder="e.g. 6:00–8:00 PM today"></div>
+          <div class="field full"><label>Pickup location</label><input id="p_loc" placeholder="Address or landmark"></div>
+          <div class="field full"><label>Notes for collectors (optional)</label><textarea id="p_notes" placeholder="Storage, packaging, contact instructions…"></textarea></div>
+        </div>
+        <button class="btn btn-gold" onclick="submitListing()">Post listing</button>
+      </div>
+    `;
+    return;
+  }
+
+  if(state.tab === 'mylistings'){
+    el.innerHTML = 'Loading…';
+    const mine = await fetchListings('mine');
+    el.innerHTML = `
+      <h3 class="section-title">My listings</h3>
+      <p class="section-sub">Track what you've posted and who's collecting it.</p>
+      ${mine.length ? mine.map(renderListingCard).join('') : `<div class="empty"><b>No listings yet</b>Post your first surplus batch from the "Post food" tab.</div>`}
+    `;
+    return;
+  }
+
+  if(state.tab === 'available'){
+    el.innerHTML = 'Loading…';
+    const open = await fetchListings('available');
+    el.innerHTML = `
+      <h3 class="section-title">Available pickups</h3>
+      <p class="section-sub">Sorted by what expires soonest.</p>
+      ${open.length ? open.map(renderListingCard).join('') : `<div class="empty"><b>Nothing open right now</b>Check back soon — new surplus food is posted throughout the day.</div>`}
+    `;
+    return;
+  }
+
+  if(state.tab === 'myclaims'){
+    el.innerHTML = 'Loading…';
+    const mine = await fetchListings('claims');
+    el.innerHTML = `
+      <h3 class="section-title">My claims</h3>
+      <p class="section-sub">Pickups you've committed to collect.</p>
+      ${mine.length ? mine.map(renderListingCard).join('') : `<div class="empty"><b>No claims yet</b>Claim a pickup from the "Available pickups" tab.</div>`}
+    `;
+    return;
+  }
+}
+
+function renderListingCard(l){
+  const t = fmtTimeLeft(l.expiryTime);
+  const u = state.currentUser;
+  let actions = '';
+  if(u.role === 'collector' && l.status === 'available'){
+    actions = `<button class="btn btn-primary btn-small" onclick="claimListing('${l.id}')">Claim pickup</button>`;
+  } else if(u.role === 'collector' && l.status === 'claimed' && l.claimedByUsername === u.username){
+    actions = `<button class="btn btn-gold btn-small" onclick="completeListing('${l.id}')">Mark picked up</button>`;
+  } else if(u.role === 'donor' && l.donorUsername === u.username && l.status !== 'completed'){
+    actions = `<button class="btn btn-ghost btn-small" onclick="cancelListing('${l.id}')">Cancel</button>`;
+  }
+  const claimedInfo = l.status !== 'available' ? `<div class="meta">Collector: ${esc(l.claimedByName || '—')}</div>` : '';
+  return `
+    <div class="listing">
+      <div class="clock ${l.status==='available' ? t.cls : ''}"><b>${l.status==='available' ? t.num : '—'}</b><span>${l.status==='available' ? t.unit : l.status}</span></div>
+      <div>
+        <div class="title">${esc(l.foodType)} <span class="badge ${l.status}">${l.status}</span></div>
+        <div class="meta">${esc(l.quantity)} · ${esc(l.donorName)} (${esc(l.donorOrg)})</div>
+        <div class="meta">📍 ${esc(l.location)} ${l.pickupWindow ? '· ' + esc(l.pickupWindow) : ''}</div>
+        ${l.notes ? `<div class="meta">${esc(l.notes)}</div>` : ''}
+        ${claimedInfo}
+      </div>
+      <div>${actions}</div>
+    </div>
+  `;
+}
+
+/* ---------------- actions ---------------- */
+function goto(view){ state.error=''; state.view = view; if(view!=='signup') state.authRole='donor'; render(); }
+function setAuthRole(role){ state.authRole = role; render(); }
+function setTab(tab){ state.tab = tab; render(); }
+
+async function submitSignup(){
+  const name = document.getElementById('f_name').value.trim();
+  const org = document.getElementById('f_org').value.trim();
+  const username = document.getElementById('f_user').value.trim().toLowerCase();
+  const pass = document.getElementById('f_pass').value;
+  if(!name || !org || !username || !pass){ state.error = 'Please fill in every field.'; return render(); }
+  if(pass.length < 6){ state.error = 'Password must be at least 6 characters.'; return render(); }
+
+  try{
+    const data = await api('/api/auth/signup', {
+      method: 'POST',
+      body: JSON.stringify({ name, org, username, password: pass, role: state.authRole })
+    });
+    state.currentUser = data.user;
+    state.error = '';
+    state.tab = null;
+    state.view = 'dashboard';
+    render();
+  }catch(e){
+    state.error = e.message;
+    render();
+  }
+}
+
+async function submitLogin(){
+  const username = document.getElementById('f_user').value.trim().toLowerCase();
+  const pass = document.getElementById('f_pass').value;
+  try{
+    const data = await api('/api/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ username, password: pass })
+    });
+    state.currentUser = data.user;
+    state.error = '';
+    state.tab = null;
+    state.view = 'dashboard';
+    render();
+  }catch(e){
+    state.error = e.message;
+    render();
+  }
+}
+
+async function logout(){
+  try{ await api('/api/auth/logout', { method: 'POST' }); }catch(e){ /* ignore */ }
+  state.currentUser = null;
+  state.view = 'landing';
+  state.tab = null;
+  render();
+}
+
+async function submitListing(){
+  const foodType = document.getElementById('p_food').value.trim();
+  const quantity = document.getElementById('p_qty').value.trim();
+  const expiryTime = document.getElementById('p_expiry').value;
+  const pickupWindow = document.getElementById('p_window').value.trim();
+  const location = document.getElementById('p_loc').value.trim();
+  const notes = document.getElementById('p_notes').value.trim();
+  if(!foodType || !quantity || !expiryTime || !location){
+    alert('Please fill in food type, quantity, pickup-by time, and location.');
+    return;
+  }
+  try{
+    await api('/api/listings', {
+      method: 'POST',
+      body: JSON.stringify({ foodType, quantity, expiryTime, pickupWindow, location, notes })
+    });
+    state.tab = 'mylistings';
+    render();
+  }catch(e){
+    alert(e.message);
+  }
+}
+
+async function claimListing(id){
+  try{
+    await api('/api/listings/' + encodeURIComponent(id) + '/claim', { method: 'POST' });
+    render();
+  }catch(e){
+    alert(e.message);
+  }
+}
+
+async function completeListing(id){
+  try{
+    await api('/api/listings/' + encodeURIComponent(id) + '/complete', { method: 'POST' });
+    render();
+  }catch(e){
+    alert(e.message);
+  }
+}
+
+async function cancelListing(id){
+  try{
+    await api('/api/listings/' + encodeURIComponent(id), { method: 'DELETE' });
+    render();
+  }catch(e){
+    alert(e.message);
+  }
+}
+
+/* ---------------- boot ---------------- */
+async function boot(){
+  const user = await fetchMe();
+  if(user){
+    state.currentUser = user;
+    state.view = 'dashboard';
+  }
+  state.loading = false;
+  render();
+}
+boot();
+</script>
+</body>
+</html>
